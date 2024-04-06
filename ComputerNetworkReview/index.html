@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>计算机网络选择题</title>
+		<script>
+			let questions = [];
+		</script>
+		<script src="chapter01.js" type="text/javascript" charset="utf-8"></script>
+		<script src="chapter02.js" type="text/javascript" charset="utf-8"></script>
+		<script src="chapter03.js" type="text/javascript" charset="utf-8"></script>
+		<script src="chapter04.js" type="text/javascript" charset="utf-8"></script>
+		<script src="chapter05.js" type="text/javascript" charset="utf-8"></script>
+		<script src="chapter06.js" type="text/javascript" charset="utf-8"></script>
+		<script src="chapter07.js" type="text/javascript" charset="utf-8"></script>
+		<script>
+			let 题目总数 = 0;
+			for (let questionGroup of questions) {
+				题目总数 += questionGroup.length;
+			}
+			let 标记按钮;
+			let 题目区, 当前题目;
+			let 历史题目 = [], 历史索引 = -1;
+			let 确定按钮;
+			function option_click(v) {
+				if (v.style.backgroundColor == "") {
+					v.style.backgroundColor = "rgba(170, 210, 250, 0.5)";
+				} else {
+					v.style.backgroundColor = ""
+				}
+			}
+			function showQuestion(index) {
+				标记按钮.style.display = "none";
+				let questionItem = findQuestionByIndex(index);
+				当前题目 = questionItem;
+				let 选项数量 = 0;
+				for (let i = 0; i < 4; i++) {
+					if (questionItem.标准答案.indexOf(["A", "B", "C", "D"][i]) >= 0) {
+						选项数量++;
+					}
+				}
+				题目区.innerHTML = "<h3 class=\"questionType\">" + (选项数量 > 1 ? "多选题" : "单选题") + "</h3><p class=\"question\">" + questionItem.题目 + "</p><p class=\"option\" onclick=\"option_click(this)\">" + questionItem.选项[0] + "</p><p class=\"option\" onclick=\"option_click(this)\">" + questionItem.选项[1] + "</p><p class=\"option\" onclick=\"option_click(this)\">" + questionItem.选项[2] + "</p><p class=\"option\" onclick=\"option_click(this)\">" + questionItem.选项[3] + "</p>"
+				确定按钮.style.backgroundColor = "";
+			}
+			function findQuestionByIndex(index) {
+				for (let i = 0, sum = 0; i < questions.length; i++) {
+					if (index - sum < questions[i].length) {
+						return questions[i][index - sum];
+					}
+					sum += questions[i].length;
+				}
+			}
+			window.onload = function() {
+				标记按钮 = document.getElementById("标记按钮");
+				题目区 = document.getElementById("题目区");
+				确定按钮 = document.getElementById("确定按钮");
+				下一题();
+			}
+			function 核对答案() {
+				if (确定按钮.style.backgroundColor == "") {
+					let options = 题目区.getElementsByClassName("option");
+					let 我的答案 = "";
+					let 正误 = true;
+					for (let i = 0; i < 4; i++) {
+						options[i].onclick = null; // 选项不能再更改
+						if (当前题目.标准答案.indexOf(["A", "B", "C", "D"][i]) >= 0) {
+							options[i].appendChild(创建对勾());
+							if (options[i].style.backgroundColor == "rgba(170, 210, 250, 0.5)") {
+								options[i].style.backgroundColor = "rgba(170, 250, 190, 0.5)"
+								我的答案 += ["A", "B", "C", "D"][i];
+							} else {
+								正误 = false;
+							}
+						} else {
+							if (options[i].style.backgroundColor == "rgba(170, 210, 250, 0.5)") {
+								options[i].style.backgroundColor = "rgba(250, 190, 190, 0.5)"
+								我的答案 += ["A", "B", "C", "D"][i];
+								正误 = false;
+							}
+						}
+					}
+					当前题目.我的答案 = 我的答案;
+					if (正误) {
+						确定按钮.style.backgroundColor = "rgba(170, 250, 190, 0.5)";
+						当前题目.已做对 = true;
+					} else {
+						确定按钮.style.backgroundColor = "rgba(250, 190, 190, 0.5)"
+						当前题目.已做对 = false;
+					}
+					标记按钮.style.display = ""; // 显示标记按钮以便勘误
+				}
+			}
+			function 创建对勾() {
+				let element = document.createElement("div");
+				element.className = "mark";
+				element.innerText = "\u2714"
+				return element;
+			}
+			function 上一题() {
+				if (历史索引 > 0) {
+					showQuestion(历史题目[--历史索引]);
+				}
+			}
+			function 下一题() {
+				if (历史索引 < 历史题目.length - 1) {
+					showQuestion(历史题目[++历史索引]);
+				} else {
+					let index = Math.floor(Math.random() * 题目总数);
+					for (let i = 1; findQuestionByIndex(index).已做对; i++) {
+						if (i/*已经检索过的题目数量*/ >= 题目总数) {
+							alert("已经完成练习");
+							return;
+						}
+						index++;
+						if (index >= 题目总数) {
+							index = 0;
+						}
+					}
+					showQuestion(index);
+					历史题目.push(index);
+					历史索引++;
+				}
+			}
+			window.onbeforeunload = function(e) { // 只要在网页上点击过任意位置，这里就会阻止直接退出
+				e.preventDefault();
+				e.returnValue = "";
+			};
+		</script>
+		<style>
+			.questionType {
+				
+			}
+			.question {
+				margin-bottom: 36px;
+			}
+			.option {
+				border: 1px solid rgba(0, 0, 0, 0.15);
+				padding: 12px;
+				cursor: pointer;
+			}
+			.option > .mark {
+				float: right;
+				color: rgb(0, 210, 70);
+				user-select: none;
+			}
+		</style>
+	</head>
+	<body style="position: fixed; left: 20px; right: 20px; height: 100%; margin: 0;">
+		<div class="option" id="标记按钮" style="position: absolute; right: 0; top: 8px; display: none;" onclick="console.log(当前题目), this.style.display='none'">标记</div>
+		<div id="题目区" style="max-width: 720px; margin: auto;"></div>
+		<div style="max-width: 600px; margin: 72px auto 24px; display: flex; user-select: none;">
+			<div class="option" style="flex-grow: 1; text-align: center;" onclick="上一题()">上一题</div>
+			<div class="option" id="确定按钮" style="flex-grow: 2; text-align: center; margin: 0 20px;" onclick="核对答案()">确定</div>
+			<div class="option" style="flex-grow: 1; text-align: center;" onclick="下一题()">下一题</div>
+		</div>
+	</body>
+</html>
